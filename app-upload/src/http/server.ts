@@ -1,17 +1,29 @@
+import "../../otel.ts";
 import { Elysia, t } from "elysia";
 import { node } from "@elysiajs/node";
 import { swagger } from "@elysiajs/swagger";
+import { dispatchUploadCreated } from "../broker/messages/upload-created.ts";
+import { opentelemetry } from "@elysiajs/opentelemetry";
 
-export const app = new Elysia({ adapter: node() }).listen(
-  3333,
-  ({ hostname, port }) => {
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { db } from "../db/client.ts";
+import { uploads } from "../db/schema/uploads.ts";
+import { randomUUID } from "node:crypto";
+
+export const app = new Elysia({ adapter: node() })
+  .use(
+    opentelemetry({
+      spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+    })
+  )
+  .listen(3333, ({ hostname, port }) => {
     console.log(
       "\x1b[32m[Upload]\x1b[0m HTTP server running at %s:%s",
       hostname,
       port
     );
-  }
-);
+  });
 
 app.use(
   swagger({
@@ -34,6 +46,22 @@ app.post(
   "/upload",
   async ({ status, body }) => {
     console.log(body);
+
+    const response = {
+      message: "Video uploaded",
+    };
+
+    await db.insert(uploads).values({
+      id: randomUUID(),
+      title: body.title,
+      description: body.description,
+    });
+
+    dispatchUploadCreated({
+      title: body.title,
+      description: body.description,
+    });
+
     return status(201, { message: "Video uploaded successfully" });
   },
   {
