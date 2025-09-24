@@ -1,5 +1,6 @@
-import { uploads } from "./uploads.ts";
+import { UploadStatus, videos } from "./videos.ts";
 
 export const schema = {
-  uploads,
+  UploadStatus,
+  videos,
 };
