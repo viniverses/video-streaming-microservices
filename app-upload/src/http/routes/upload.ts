@@ -154,22 +154,6 @@ export function uploadRoutes(app: Elysia) {
           const { videoId } = body;
           const key = `videos/${videoId}.mp4`;
 
-          /*
-          const existing = await db
-            .select({ id: videos.id, status: videos.status, path: videos.path })
-            .from(videos)
-            .where(eq(videos.id, videoId))
-            .limit(1);
-
-          if (existing.length === 0) {
-            return status(404, { message: "Vídeo não encontrado" });
-          }
-
-          if (existing[0].status !== "pending") {
-            return status(409, { message: "Upload já confirmado" });
-          }
-          */
-
           const exists = await objectExists(key);
           if (!exists) {
             return status(404, {

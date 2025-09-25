@@ -3,7 +3,9 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { PassThrough } from "node:stream";
 
 const BUCKET = process.env.AWS_S3_BUCKET!;
 const REGION = process.env.AWS_REGION || "sa-east-1";
@@ -46,4 +48,22 @@ export async function objectExists(key: string) {
 
 export function getPublicUrlForKey(key: string) {
   return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+}
+
+export function createS3UploadStream(key: string, contentType?: string) {
+  const pass = new PassThrough();
+
+  const upload = new Upload({
+    client: s3Client,
+    params: {
+      Bucket: BUCKET,
+      Key: key,
+      Body: pass,
+      ...(contentType ? { ContentType: contentType } : {}),
+    },
+  });
+
+  const donePromise = upload.done();
+
+  return { pass, uploadPromise: donePromise };
 }
