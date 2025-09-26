@@ -3,32 +3,23 @@ import type { FfprobeData } from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
 import type { Writable } from 'node:stream';
-
-function resolveBinaryPath(value: unknown) {
-  if (!value) return null;
-  if (typeof value === 'string') return value as string;
-  if (typeof value === 'object') {
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    const candidate = (value as any).path ?? (value as any).default;
-    if (typeof candidate === 'string') return candidate as string;
-  }
-  return null;
-}
+import { existsSync } from 'node:fs';
 
 export function ensureFfmpegConfigured(): void {
-  const ffmpegBinaryPath = resolveBinaryPath(ffmpegPath);
-  const ffprobeBinary = resolveBinaryPath(ffprobePath) ?? ffmpegBinaryPath;
+  const ffmpegBinaryPath = ffmpegPath as unknown as string;
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  const ffprobeBinaryPath = (ffprobePath as any).path;
 
-  if (!ffmpegBinaryPath || typeof ffmpegBinaryPath !== 'string') {
-    throw new Error('FFmpeg path inválido');
+  if (!ffmpegBinaryPath || !existsSync(ffmpegBinaryPath)) {
+    throw new Error(`FFmpeg bin not found at: ${ffmpegBinaryPath}`);
   }
 
-  if (!ffprobeBinary || typeof ffprobeBinary !== 'string') {
-    throw new Error('FFprobe path inválido');
+  if (!ffprobeBinaryPath || !existsSync(ffprobeBinaryPath)) {
+    throw new Error(`FFprobe bin not found at: ${ffprobeBinaryPath}`);
   }
 
   ffmpeg.setFfmpegPath(ffmpegBinaryPath);
-  ffmpeg.setFfprobePath(ffprobeBinary);
+  ffmpeg.setFfprobePath(ffprobeBinaryPath);
 }
 
 export async function getVideoMetadata(
@@ -88,10 +79,11 @@ export async function generateThumbnailToStream(
 export async function transcodeToMp4Stream(
   sourcePath: string,
   height: string,
-  writable: Writable
+  writable: Writable,
+  onProgress?: (percent: number) => void
 ): Promise<void> {
   ensureFfmpegConfigured();
-  console.log(`Iniciando transcodificação para ${height}p:`, sourcePath);
+  console.log(`Iniciando transcodificação para ${height}p:`);
 
   await new Promise<void>((resolve, reject) => {
     ffmpeg(sourcePath)
@@ -104,10 +96,10 @@ export async function transcodeToMp4Stream(
         resolve();
       })
       .on('progress', (progress) => {
-        console.log(
-          `Progresso da transcodificação ${height}p:`,
-          progress.percent + '%'
-        );
+        const percent =
+          typeof progress.percent === 'number' ? progress.percent : 0;
+        console.log(`Progresso da transcodificação ${height}p:`, percent + '%');
+        if (onProgress) onProgress(percent);
       })
       .on('error', (err, stdout, stderr) => {
         console.error(`Erro na transcodificação ${height}p:`, err);

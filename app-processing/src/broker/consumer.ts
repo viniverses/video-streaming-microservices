@@ -1,80 +1,28 @@
-import { randomUUID } from 'node:crypto';
 import type { UploadFinished } from '../../../contracts/messages/upload-finished.ts';
-import { db } from '../db/client.ts';
-import { processing } from '../db/schema/processing.ts';
-import {
-  generateThumbnailToStream,
-  getVideoMetadata,
-  transcodeToMp4Stream,
-} from '../lib/ffmpeg.ts';
-import { createS3UploadStream } from '../lib/s3.ts';
 import { channels } from './channels/index.ts';
 import { EVENTS } from './events.ts';
+import { videoMetadataQueue } from '@/queues/video-metadata.ts';
+import { videoThumbnailQueue } from '@/queues/video-thumbnail.ts';
+import { videoTranscodeQueue } from '@/queues/video-transcode.ts';
 
-const processUploadFinished = async (data: UploadFinished): Promise<void> => {
+const RESOLUTIONS = ['1080', '720', '480'] as const;
+
+export async function processUploadFinished(
+  data: UploadFinished
+): Promise<void> {
   const { videoId, path } = data;
-  const resolutions = ['1080', '720', '480'];
 
-  try {
-    const metadata = await getVideoMetadata(path);
-    const videoDuration = metadata?.format?.duration
-      ? Math.floor(metadata.format.duration)
-      : null;
+  await videoMetadataQueue.add('videos.metadata', { videoId, path });
+  await videoThumbnailQueue.add('videos.thumbnail', { videoId, path });
 
-    console.log('videoDuration', videoDuration);
-
-    await db.insert(processing).values({
-      id: randomUUID(),
-      videoId: data.videoId,
-      duration: videoDuration ?? null,
+  for (const height of RESOLUTIONS) {
+    await videoTranscodeQueue.add('videos.transcode', {
+      videoId,
+      path,
+      height,
     });
-
-    const thumbKey = `videos/${videoId}/thumbnail.jpg`;
-    console.log('Gerando thumbnail:', thumbKey);
-    const { pass: thumbPass, uploadPromise: thumbUploadPromise } =
-      createS3UploadStream(thumbKey, 'image/jpg');
-
-    await generateThumbnailToStream(path, thumbPass);
-    await thumbUploadPromise;
-
-    for (const resolution of resolutions) {
-      const videoKey = `videos/${videoId}/${videoId}-${resolution}p.mp4`;
-      console.log(`Processando resolução ${resolution}p:`, videoKey);
-
-      const { pass: videoPass, uploadPromise: videoUploadPromise } =
-        createS3UploadStream(videoKey, 'video/mp4');
-
-      await transcodeToMp4Stream(path, resolution, videoPass);
-      await videoUploadPromise;
-      console.log(
-        `Vídeo ${resolution}p processado e enviado para S3 com sucesso`
-      );
-    }
-
-    console.log('processUploadFinished finished');
-  } catch (error) {
-    console.error('processUploadFinished', error);
-    throw error;
   }
-};
-
-const processMessage = async (
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-  message: any,
-  routingKey: string
-): Promise<void> => {
-  const data = JSON.parse(message.content.toString());
-
-  switch (routingKey) {
-    case EVENTS.UPLOAD_CREATED:
-      break;
-    case EVENTS.UPLOAD_FINISHED:
-      await processUploadFinished(data);
-      break;
-    default:
-      break;
-  }
-};
+}
 
 channels.uploads.consume(
   'uploads',
@@ -83,7 +31,10 @@ channels.uploads.consume(
       const routingKey = message.fields.routingKey;
 
       try {
-        await processMessage(message, routingKey);
+        if (routingKey === EVENTS.UPLOAD_FINISHED) {
+          const data = JSON.parse(message.content.toString());
+          await processUploadFinished(data as UploadFinished);
+        }
         channels.uploads.ack(message);
       } catch (error) {
         console.error(error);
