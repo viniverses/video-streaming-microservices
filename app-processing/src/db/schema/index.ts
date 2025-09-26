@@ -1,4 +1,4 @@
-import { processing } from "./processing.ts";
+import { processing } from './processing.ts';
 
 export const schema = {
   processing,

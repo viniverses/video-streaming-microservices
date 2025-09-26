@@ -1,4 +1,4 @@
-import { uploads } from "./uploads.ts";
+import { uploads } from './uploads.ts';
 
 export const channels = {
   uploads,
