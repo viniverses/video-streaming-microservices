@@ -1,10 +1,6 @@
 export const EVENTS = {
-  UPLOAD_CREATED: 'upload.created',
-  UPLOAD_FINISHED: 'upload.finished',
   PROCESSING_STEP_STARTED: 'processing.step.started',
   PROCESSING_STEP_COMPLETED: 'processing.step.completed',
   PROCESSING_STEP_FAILED: 'processing.step.failed',
   PROCESSING_FAILED: 'processing.failed',
 } as const;
-
-export type EventRoutingKey = (typeof EVENTS)[keyof typeof EVENTS];

@@ -1,0 +1,51 @@
+{
+  "name": "metadata-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "start": "node --experimental-strip-types --no-warnings src/app.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.4",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.896.0",
+    "@aws-sdk/lib-storage": "^3.896.0",
+    "@aws-sdk/s3-request-presigner": "^3.896.0",
+    "@opentelemetry/api": "^1.9.0",
+    "amqplib": "^0.10.9",
+    "bullmq": "^5.58.9",
+    "dotenv": "^17.2.2",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "ioredis": "^5.8.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.64.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.205.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.205.0",
+    "@opentelemetry/sdk-node": "^0.205.0",
+    "@opentelemetry/sdk-trace-node": "^2.1.0",
+    "@types/amqplib": "^0.10.7",
+    "@types/ffprobe-static": "^2.0.3",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/node": "^24.5.2",
+    "@types/pg": "^8.15.5",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "prettier-eslint": "^16.4.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1"
+  }
+}

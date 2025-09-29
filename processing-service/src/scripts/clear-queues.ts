@@ -1,70 +1,37 @@
-import { videoMetadataQueue } from '@/queues/video-metadata.ts';
-import { videoThumbnailQueue } from '@/queues/video-thumbnail.ts';
-import { videoTranscodeQueue } from '@/queues/video-transcode.ts';
+import { Queue } from 'bullmq';
+import { redis } from '../lib/redis.ts';
 
-const clearAllQueues = async () => {
-  console.log('🧹 Limpando filas...');
+const queueNames = [
+  'processing.orchestrator.queue',
+  'processing.thumb.queue',
+  'processing.metadata.queue',
+  'processing.encode.queue',
+];
 
-  await videoMetadataQueue.clean(0, 100, 'completed');
-  await videoMetadataQueue.clean(0, 100, 'failed');
+async function clearAllQueues() {
+  console.log('🧹 Limpando todas as filas de processamento...');
 
-  await videoThumbnailQueue.clean(0, 100, 'completed');
-  await videoThumbnailQueue.clean(0, 100, 'failed');
-
-  await videoTranscodeQueue.clean(0, 100, 'completed');
-  await videoTranscodeQueue.clean(0, 100, 'failed');
-
-  console.log('✅ Filas limpas');
-};
-
-const obliterateAllQueues = async () => {
-  console.log('💥 OBLITERANDO filas...');
-
-  await videoMetadataQueue.obliterate({ force: true });
-  await videoThumbnailQueue.obliterate({ force: true });
-  await videoTranscodeQueue.obliterate({ force: true });
-
-  console.log('✅ Filas obliteradas');
-};
-
-const showStats = async () => {
-  const [meta, thumb, trans] = await Promise.all([
-    videoMetadataQueue.getJobCounts(),
-    videoThumbnailQueue.getJobCounts(),
-    videoTranscodeQueue.getJobCounts(),
-  ]);
-
-  console.log('📊 Status das filas:');
-  console.log('Metadata:', meta);
-  console.log('Thumbnail:', thumb);
-  console.log('Transcode:', trans);
-};
-
-const main = async () => {
-  const command = process.argv[2];
-
-  switch (command) {
-    case 'clean':
-      await clearAllQueues();
-      break;
-    case 'obliterate':
-      await obliterateAllQueues();
-      break;
-    case 'stats':
-      await showStats();
-      break;
-    default:
-      console.log(`
-🔧 Script de limpeza de filas BullMQ
-
-Uso:
-  pnpm run clear-queues clean      # Remove jobs completados/falhados
-  pnpm run clear-queues obliterate # Remove TODOS os jobs (CUIDADO!)
-  pnpm run clear-queues stats      # Mostra estatísticas das filas
-      `);
+  for (const queueName of queueNames) {
+    const queue = new Queue(queueName, { connection: redis });
+    try {
+      await queue.obliterate({ force: true });
+      console.log(`✅ Fila "${queueName}" limpa com sucesso!`);
+    } catch (error) {
+      console.error(`❌ Erro ao limpar a fila "${queueName}":`, error);
+    } finally {
+      await queue.close();
+    }
   }
+}
 
-  process.exit(0);
-};
-
-main().catch(console.error);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  clearAllQueues()
+    .then(() => {
+      console.log('🎉 Todas as filas foram limpas.');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('💥 Erro ao executar o script de limpeza:', error);
+      process.exit(1);
+    });
+}

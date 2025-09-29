@@ -1,5 +1,5 @@
 import '@/lib/opentelemetry.ts';
-import '@/workers/index.ts';
 import '@/broker/consumer.ts';
+import '@/worker.ts';
 
-console.log('Workers and consumer are running...');
+console.log('Processing service started...');
