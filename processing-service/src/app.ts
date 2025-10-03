@@ -2,4 +2,21 @@ import '@/lib/opentelemetry.ts';
 import '@/broker/consumer.ts';
 import '@/worker.ts';
 
-console.log('Processing service started...');
+console.log('Workers and consumer are running...');
+
+import { Elysia } from 'elysia';
+import { node } from '@elysiajs/node';
+
+export const app = new Elysia({ adapter: node() });
+
+app.get('/health', ({ status }) => {
+  return status(200, 'OK');
+});
+
+app.listen(3334, ({ hostname, port }) => {
+  console.log(
+    '\x1b[32m[Processing]\x1b[0m HTTP server running at %s:%s',
+    hostname,
+    port
+  );
+});
