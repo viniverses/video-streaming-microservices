@@ -1,13 +1,9 @@
-import { s3Keys, videoMetadataSchema } from '@repo/contracts';
+import { videoMetadataSchema } from '@repo/contracts';
 import { desc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client.ts';
 import { processing } from '@/db/schema/processing.ts';
 import { processingLogs } from '@/db/schema/processing-logs.ts';
-import { storage } from '@/infra/storage.ts';
-
-const originalVideoPublicUrl = (videoId: string) =>
-  storage.getPublicUrl(s3Keys.originalUpload(videoId));
 
 const normalizeLogData = (
   step: string,
@@ -33,7 +29,6 @@ export const getProcessingStatus = async (videoId: string) => {
   if (!record) {
     return {
       videoId,
-      publicUrl: originalVideoPublicUrl(videoId),
       status: 'pending' as const,
       createdAt: null,
       updatedAt: null,
@@ -60,7 +55,6 @@ export const getProcessingStatus = async (videoId: string) => {
 
   return {
     videoId: record.videoId,
-    publicUrl: originalVideoPublicUrl(record.videoId),
     status: record.status,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,

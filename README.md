@@ -71,7 +71,7 @@ docker build -f docker/Dockerfile.service --build-arg SERVICE=transcode-service 
 - **Monorepo with Turborepo pipeline**: `check-types` and `lint` across every package/app with granular caching and `dependsOn` (`^check-types`), avoiding redundant builds.
 - **Capability-scoped env validation** (`@repo/env`) via Zod — each service validates only the variables it consumes.
 - **Reliable messaging**: publisher confirms, runtime contract validation, three delayed retries and a dead-letter queue per consumer/event subscription.
-- **Object Ownership enforced + bucket policy**: uploads without per-object ACLs; public read is scoped to the `videos/*` prefix, everything else stays private (signed URLs).
+- **Object Ownership enforced + bucket policy**: uploads without per-object ACLs; originals stay private under `originals/*`, while public read is scoped to derived media under `videos/*/{renditions,thumbnails,audio}/*`.
 - **Idempotency at the boundary**: the S3 webhook validates the key (`ORIGINAL_UPLOAD_KEY_PATTERN`) and discards events outside the original-upload scope — prevents duplicate pipelines.
 - **Clean shutdown**: every service handles `SIGINT/SIGTERM` and attempts to close subscriptions, workers, auxiliary resources and the broker before exit.
 - **Internal publishable packages** (`@repo/broker`, `@repo/queue`, `@repo/storage`, `@repo/ffmpeg`): each cross-cutting capability is a small, replaceable package.

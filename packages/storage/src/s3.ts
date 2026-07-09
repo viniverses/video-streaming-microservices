@@ -51,6 +51,26 @@ export const createStorage = (config: StorageConfig) => {
     );
   };
 
+  const getPresignedDownloadUrl = async ({
+    bucket,
+    key,
+    expiresIn = 3600,
+  }: {
+    bucket?: string;
+    key: string;
+    expiresIn?: number;
+  }) => {
+    const resolvedBucket = resolveBucket(bucket);
+    return getSignedUrl(
+      config.client,
+      new GetObjectCommand({
+        Bucket: resolvedBucket,
+        Key: key,
+      }),
+      { expiresIn }
+    );
+  };
+
   const getPublicUrl = (key: string, bucket?: string): string => {
     const resolvedBucket = resolveBucket(bucket);
     const encodedKey = key.split('/').map(encodeURIComponent).join('/');
@@ -103,6 +123,7 @@ export const createStorage = (config: StorageConfig) => {
     createS3UploadStream,
     downloadToFile,
     getDefaultBucket: () => config.defaultBucket,
+    getPresignedDownloadUrl,
     getPresignedUploadUrl,
     getPublicUrl,
   };

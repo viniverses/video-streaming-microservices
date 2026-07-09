@@ -1,16 +1,12 @@
 import {
   processingPipelineResultSchema,
   RENDITION_HEIGHTS,
-  s3Keys,
 } from '@repo/contracts';
 
 import type { processing } from '@/db/schema/processing.ts';
 import { storage } from '@/infra/storage.ts';
 
 type ProcessingRecord = typeof processing.$inferSelect;
-
-const originalVideoPublicUrl = (videoId: string) =>
-  storage.getPublicUrl(s3Keys.originalUpload(videoId));
 
 export const buildVideoResult = (
   videoId: string,
@@ -43,7 +39,7 @@ export const buildVideoResult = (
     status,
     ready,
     original: {
-      url: originalVideoPublicUrl(videoId),
+      url: null,
     },
     metadata: metadata
       ? {

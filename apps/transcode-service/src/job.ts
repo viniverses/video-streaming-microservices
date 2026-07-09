@@ -8,8 +8,6 @@ import { Job } from '@repo/queue';
 
 import { storage } from '@/infra/storage.ts';
 
-// Metadata baixa o original para disco (probe + thumbnails + faixas de áudio).
-// Transcode usa sourceUrl (URL pública) por ser single-pass e rodar em paralelo por resolução.
 export async function videoTranscodeJob(
   job: Job<EncodeJobData>
 ): Promise<TranscodeChildResult> {
@@ -20,15 +18,10 @@ async function runVideoTranscodeJob(
   job: Job<EncodeJobData>
 ): Promise<TranscodeChildResult> {
   try {
-    const { bucket, key, sourceUrl, videoId, resolution } = job.data;
+    const { bucket, key, videoId, resolution } = job.data;
+    const sourceUrl = await storage.getPresignedDownloadUrl({ bucket, key });
 
-    console.log(
-      'Transcoding video to resolution:',
-      bucket,
-      key,
-      sourceUrl,
-      videoId
-    );
+    console.log('Transcoding video to resolution:', bucket, key, videoId);
 
     const videoKey = s3Keys.rendition(videoId, resolution);
 
