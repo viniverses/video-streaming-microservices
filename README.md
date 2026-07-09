@@ -1,3 +1,5 @@
+<img width="1558" height="1061" alt="thumb-microservices" src="https://github.com/user-attachments/assets/02df3708-01ca-4062-9b27-3b9b9d1a9e6e" />
+
 # Video Streaming Microservices
 
 **Event-driven streaming platform** — presigned S3 uploads, RabbitMQ + BullMQ orchestration, and parallel ffmpeg transcoding to multiple renditions — in a TypeScript monorepo **designed to scale out horizontally**: stateless HTTP edges, competing consumers on shared queues, and Redis/RabbitMQ/Postgres as the coordination backbone so you add more instances, not bigger boxes.
