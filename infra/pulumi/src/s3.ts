@@ -26,9 +26,14 @@ export const createUploadBucket = (
       bucket: uploadBucket.id,
       corsRules: [
         {
-          allowedHeaders: ['*'],
-          allowedMethods: ['GET', 'PUT', 'POST', 'HEAD', 'DELETE'],
-          allowedOrigins: ['*'],
+          allowedHeaders: ['Content-Type'],
+          allowedMethods: ['PUT', 'GET', 'HEAD'],
+          allowedOrigins: [
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+          ],
           exposeHeaders: ['ETag'],
           maxAgeSeconds: 3600,
         },
@@ -73,7 +78,11 @@ export const createUploadBucket = (
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "${uploadBucket.arn}/videos/*"
+            "Resource": [
+              "${uploadBucket.arn}/videos/*/renditions/*",
+              "${uploadBucket.arn}/videos/*/thumbnails/*",
+              "${uploadBucket.arn}/videos/*/audio/*"
+            ]
           }
         ]
       }`,
@@ -99,7 +108,7 @@ export const wireUploadBucketNotification = (
         {
           lambdaFunctionArn: lambdaFunction.arn,
           events: ['s3:ObjectCreated:*'],
-          filterPrefix: 'videos/',
+          filterPrefix: 'originals/',
         },
       ],
     },
