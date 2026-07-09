@@ -1,0 +1,27 @@
+{
+  "name": "@repo/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "types": "./index.ts",
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.5.2",
+    "eslint": "^10.2.0",
+    "typescript": "^5.9.2"
+  },
+  "prettier": "@repo/prettier-config"
+}

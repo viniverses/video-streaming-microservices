@@ -1,0 +1,29 @@
+{
+  "name": "core",
+  "private": true,
+  "scripts": {
+    "infra:up": "docker compose up -d && docker compose -f apps/processing-service/docker-compose.yml up -d --wait",
+    "infra:down": "docker compose down && docker compose -f apps/processing-service/docker-compose.yml down",
+    "localstack:up": "docker compose -f infra/pulumi/docker-compose.yml up -d --wait",
+    "localstack:down": "docker compose -f infra/pulumi/docker-compose.yml down",
+    "setup:local": "pnpm infra:up && pnpm --filter processing-service db:migrate",
+    "reset:down": "pnpm --filter @repo/pulumi down:dev && pnpm localstack:down && pnpm infra:down",
+    "reset:up": "pnpm setup:local && pnpm localstack:up && pnpm --filter @repo/pulumi up:dev",
+    "reset:local": "pnpm reset:down && pnpm reset:up",
+    "build": "turbo run build",
+    "build:lambda": "pnpm --filter upload-service build",
+    "dev": "turbo run dev --filter=\"./apps/*\"",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,js,md}\"",
+    "check-types": "turbo run check-types"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "2.9.6",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.16.1"
+}

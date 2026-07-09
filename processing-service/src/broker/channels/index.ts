@@ -1,7 +1,0 @@
-import { uploads } from './uploads.ts';
-import { processing } from './processing.ts';
-
-export const channels = {
-  uploads,
-  processing,
-};

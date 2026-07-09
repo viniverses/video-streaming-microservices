@@ -1,0 +1,29 @@
+{
+  "name": "@repo/broker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/contracts": "workspace:*",
+    "amqplib": "^0.10.9"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/amqplib": "^0.10.7",
+    "@types/node": "^24.5.2",
+    "eslint": "^10.2.0",
+    "typescript": "^5.9.2"
+  },
+  "prettier": "@repo/prettier-config"
+}

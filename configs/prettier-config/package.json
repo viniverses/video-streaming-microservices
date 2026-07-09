@@ -1,0 +1,11 @@
+{
+  "name": "@repo/prettier-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "prettier": "./index.js",
+  "publishConfig": {
+    "access": "public"
+  }
+}

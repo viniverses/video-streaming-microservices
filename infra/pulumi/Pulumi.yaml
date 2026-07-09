@@ -1,0 +1,3 @@
+name: upload-infra
+runtime: nodejs
+main: src/index.ts

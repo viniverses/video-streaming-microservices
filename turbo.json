@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalEnv": [
+    "BROKER_URL",
+    "DATABASE_URL",
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "REDIS_URL",
+    "AWS_REGION",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_ENDPOINT_URL",
+    "AWS_S3_BUCKET",
+    "UPLOAD_SERVICE_WEBHOOK_URL",
+    "CORS_ORIGIN",
+    "VITE_GITHUB_REPO_URL",
+    "VITE_JAEGER_URL",
+    "VITE_JAEGER_SEARCH_SERVICE",
+    "VITE_RABBITMQ_URL",
+    "VITE_SWAGGER_UPLOAD_URL",
+    "VITE_PROCESSING_API_URL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "outputs": []
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    }
+  }
+}

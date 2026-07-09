@@ -1,0 +1,5 @@
+config:
+  project:s3Bucket: upload-service-bucket
+  project:uploadWebhookUrl: http://host.docker.internal:3333/upload/webhook
+  project:lambdaDistDir: ../../apps/upload-service/dist
+encryptionsalt: v1:RXW7yMl5Vh8=:v1:u7HsVsGXKTL0KBQG:fougV6OJg+qb1KF9YQbenWsqy3G7Ig==

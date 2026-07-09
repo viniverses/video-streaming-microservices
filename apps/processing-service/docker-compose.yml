@@ -1,0 +1,16 @@
+services:
+  processing-pg:
+    restart: unless-stopped
+    image: bitnami/postgresql:latest
+    ports:
+      - '5483:5432'
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=processing
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U docker -d processing']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s

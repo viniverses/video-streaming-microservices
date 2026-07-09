@@ -1,0 +1,26 @@
+{
+  "name": "@repo/pulumi",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "up:dev": "node scripts/pulumi-dev.mjs up",
+    "down:dev": "node scripts/pulumi-dev.mjs down"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.83.3",
+    "@pulumi/pulumi": "^3.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^18.0.0",
+    "eslint": "^10.2.0",
+    "globals": "^16.5.0",
+    "typescript": "^5.0.0"
+  },
+  "prettier": "@repo/prettier-config"
+}

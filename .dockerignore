@@ -1,0 +1,7 @@
+node_modules
+.turbo
+dist
+.git
+.env*
+.pnpm-store
+**/*.tsbuildinfo

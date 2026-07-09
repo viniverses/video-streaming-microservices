@@ -1,20 +1,29 @@
 services:
   broker:
+    restart: unless-stopped
     image: rabbitmq:4-management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - '5672:5672'
+      - '15672:15672'
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
   jaeger:
+    restart: unless-stopped
     image: jaegertracing/all-in-one:1.57
     ports:
-      - "16686:16686" # UI
-      - "6831:6831/udp" # Traces UDP
-      - "14268:14268" # Traces HTTP
-      - "4317:4317" # OTLP/gRPC
-      - "4318:4318" # OTLP/HTTP
+      - '16686:16686' # UI
+      - '6831:6831/udp' # Traces UDP
+      - '14268:14268' # Traces HTTP
+      - '4317:4317' # OTLP/gRPC
+      - '4318:4318' # OTLP/HTTP
+
+  redis:
+    restart: unless-stopped
+    image: redis
+    command: redis-server
+    ports:
+      - '6379:6379'
 
 volumes:
   rabbitmq_data:

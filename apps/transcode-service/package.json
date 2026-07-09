@@ -1,0 +1,40 @@
+{
+  "name": "transcode-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "build": "tsup",
+    "start": "node dist/app.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.16.1",
+  "prettier": "@repo/prettier-config",
+  "dependencies": {
+    "@repo/broker": "workspace:*",
+    "@repo/contracts": "workspace:*",
+    "@repo/env": "workspace:*",
+    "@repo/ffmpeg": "workspace:*",
+    "@repo/queue": "workspace:*",
+    "@repo/storage": "workspace:*",
+    "@elysiajs/node": "1.4.0",
+    "elysia": "1.4.7"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.5.2",
+    "eslint": "^10.2.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
