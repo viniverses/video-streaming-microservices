@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 export const brokerEnvSchema = {
   BROKER_URL: z.string().url(),
+  BROKER_EXCHANGE: z.string().min(1),
 } as const;
 
 export const redisEnvSchema = {
