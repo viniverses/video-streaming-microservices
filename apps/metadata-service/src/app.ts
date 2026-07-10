@@ -3,7 +3,7 @@ import { registerAppShutdown } from '@repo/broker';
 import { Elysia } from 'elysia';
 
 import { broker } from '@/broker/broker.ts';
-import { redis } from '@/infra/redis.ts';
+import { redis } from '@/lib/redis.ts';
 import { worker } from '@/worker.ts';
 
 console.log('Workers and consumer are running...');

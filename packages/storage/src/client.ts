@@ -5,6 +5,7 @@ export type StorageClientConfig = {
   accessKeyId: string;
   secretAccessKey: string;
   endpoint?: string;
+  forcePathStyle?: boolean;
 };
 
 export const createStorageClient = (config: StorageClientConfig) =>
@@ -16,6 +17,6 @@ export const createStorageClient = (config: StorageClientConfig) =>
     },
     ...(config.endpoint && {
       endpoint: config.endpoint,
-      forcePathStyle: true,
+      forcePathStyle: config.forcePathStyle ?? true,
     }),
   });

@@ -6,7 +6,7 @@ import {
 import { transcodeToMp4Stream } from '@repo/ffmpeg';
 import { Job } from '@repo/queue';
 
-import { storage } from '@/infra/storage.ts';
+import { storage } from '@/lib/s3.ts';
 
 export async function videoTranscodeJob(
   job: Job<EncodeJobData>

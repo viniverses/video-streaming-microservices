@@ -9,7 +9,7 @@ import { processingRoutes } from '@/http/routes/processing.ts';
 
 import { env } from './config/env.ts';
 import { flowProducer } from './flow-producer.ts';
-import { redis } from './infra/redis.ts';
+import { redis } from './lib/redis.ts';
 import { worker } from './worker.ts';
 
 const subscriptions = await registerConsumers();

@@ -6,7 +6,7 @@ import {
 import { createProcessingStepWorker } from '@repo/queue';
 
 import { broker } from '@/broker/broker.ts';
-import { redis } from '@/infra/redis.ts';
+import { redis } from '@/lib/redis.ts';
 import { videoTranscodeJob } from '@/job.ts';
 
 export const worker = createProcessingStepWorker<

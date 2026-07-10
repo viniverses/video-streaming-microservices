@@ -4,7 +4,7 @@ import { EVENT, parseOriginalUploadKey, s3Keys } from '@repo/contracts';
 import { Elysia, status, t } from 'elysia';
 
 import { broker } from '../../broker/broker.ts';
-import { storage } from '../../infra/storage.ts';
+import { storage } from '../../lib/s3.ts';
 
 export const uploadRoutes = (app: Elysia) => {
   return app.group('/upload', (app) =>

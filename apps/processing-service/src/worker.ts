@@ -11,7 +11,7 @@ import { and, eq } from 'drizzle-orm';
 import { broker } from './broker/broker.ts';
 import { db } from './db/client.ts';
 import { processing } from './db/schema/processing.ts';
-import { redis } from './infra/redis.ts';
+import { redis } from './lib/redis.ts';
 import { aggregateProcessingResults } from './lib/aggregate-processing-results.ts';
 
 type OrchestratorJob = Job<ProcessingJobData, ProcessingPipelineResult, string>;
