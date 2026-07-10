@@ -3,16 +3,13 @@ import {
   EVENT,
   type ProcessingJobData,
   type ProcessingPipelineResult,
-  processingPipelineResultSchema,
 } from '@repo/contracts';
 import { type Job, Worker } from '@repo/queue';
-import { and, eq } from 'drizzle-orm';
 
 import { broker } from './broker/broker.ts';
-import { db } from './db/client.ts';
-import { processing } from './db/schema/processing.ts';
-import { redis } from './lib/redis.ts';
+import { finishProcessing } from './db/repositories/processing-repository.ts';
 import { aggregateProcessingResults } from './lib/aggregate-processing-results.ts';
+import { redis } from './lib/redis.ts';
 
 type OrchestratorJob = Job<ProcessingJobData, ProcessingPipelineResult, string>;
 
@@ -30,46 +27,6 @@ const getPipelineResult = async (
   return aggregateProcessingResults(job.data.videoId, childrenValues);
 };
 
-const persistResult = async (result: ProcessingPipelineResult) => {
-  const now = new Date();
-  const [updated] = await db
-    .update(processing)
-    .set({
-      status: result.status,
-      result,
-      finishedAt: now,
-      updatedAt: now,
-    })
-    .where(
-      and(
-        eq(processing.videoId, result.videoId),
-        eq(processing.status, 'in_progress')
-      )
-    )
-    .returning({ result: processing.result });
-
-  if (updated) return { result, shouldPublish: true };
-
-  const [current] = await db
-    .select({ status: processing.status, result: processing.result })
-    .from(processing)
-    .where(eq(processing.videoId, result.videoId))
-    .limit(1);
-
-  if (!current) {
-    throw new Error(`Processing record not found for video ${result.videoId}`);
-  }
-
-  const persisted = processingPipelineResultSchema.safeParse(current.result);
-  if (persisted.success) {
-    return { result: persisted.data, shouldPublish: true };
-  }
-
-  throw new Error(
-    `Processing ${result.videoId} is terminal without a valid pipeline result`
-  );
-};
-
 const publishResult = async (result: ProcessingPipelineResult) => {
   const routingKey =
     result.status === 'completed'
@@ -85,7 +42,7 @@ export const worker = new Worker<ProcessingJobData, ProcessingPipelineResult>(
     console.log('Processing orchestrator job:', job.data.videoId);
 
     const result = await getPipelineResult(job);
-    const persisted = await persistResult(result);
+    const persisted = await finishProcessing(result);
 
     if (persisted.shouldPublish) {
       await publishResult(persisted.result);
