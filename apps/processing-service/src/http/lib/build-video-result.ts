@@ -4,7 +4,7 @@ import {
 } from '@repo/contracts';
 
 import type { processing } from '@/db/schema/processing.ts';
-import { storage } from '@/infra/storage.ts';
+import { storage } from '@/lib/s3.ts';
 
 type ProcessingRecord = typeof processing.$inferSelect;
 

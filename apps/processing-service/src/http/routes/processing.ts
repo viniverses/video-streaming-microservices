@@ -1,10 +1,10 @@
-import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-import { db } from '@/db/client.ts';
-import { processing } from '@/db/schema/processing.ts';
+import {
+  findByVideoId,
+  getStatusWithLogs,
+} from '@/db/repositories/processing-repository.ts';
 import { buildVideoResult } from '@/http/lib/build-video-result.ts';
-import { getProcessingStatus } from '@/lib/get-processing-status.ts';
 
 export const processingRoutes = (app: Elysia) =>
   app.group('/processing', (app) =>
@@ -13,12 +13,7 @@ export const processingRoutes = (app: Elysia) =>
         '/:videoId/result',
         async ({ params }) => {
           const { videoId } = params;
-
-          const [record] = await db
-            .select()
-            .from(processing)
-            .where(eq(processing.videoId, videoId))
-            .limit(1);
+          const record = await findByVideoId(videoId);
 
           return buildVideoResult(videoId, record);
         },
@@ -30,7 +25,7 @@ export const processingRoutes = (app: Elysia) =>
       )
       .get(
         '/:videoId',
-        async ({ params }) => getProcessingStatus(params.videoId),
+        async ({ params }) => getStatusWithLogs(params.videoId),
         {
           params: t.Object({
             videoId: t.String({ format: 'uuid' }),

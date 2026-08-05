@@ -1,5 +1,5 @@
 import { createFlowProducer } from '@repo/queue';
 
-import { redis } from './infra/redis.ts';
+import { redis } from './lib/redis.ts';
 
 export const flowProducer = createFlowProducer(redis);

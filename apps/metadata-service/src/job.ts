@@ -15,8 +15,8 @@ import {
 } from '@repo/ffmpeg';
 import { Job } from '@repo/queue';
 
-import { storage } from '@/infra/storage.ts';
 import { buildThumbnailTimestamps } from '@/lib/build-thumbnail-timestamps.ts';
+import { storage } from '@/lib/s3.ts';
 
 const THUMBNAIL_COUNT = 3;
 

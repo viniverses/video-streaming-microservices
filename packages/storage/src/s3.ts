@@ -12,12 +12,27 @@ import {
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export type StorageConfig = {
+import { createStorageClient } from './client.ts';
+
+type StorageWithClientConfig = {
   client: S3Client;
   defaultBucket: string;
   region: string;
   endpoint?: string;
+  publicBaseUrl?: string;
 };
+
+type StorageCredentialsConfig = {
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  endpoint?: string;
+  bucket: string;
+  publicBaseUrl?: string;
+  forcePathStyle?: boolean;
+};
+
+export type StorageConfig = StorageWithClientConfig | StorageCredentialsConfig;
 
 export interface UploadStream {
   pass: Writable;
@@ -25,8 +40,35 @@ export interface UploadStream {
   abort: () => Promise<void>;
 }
 
-export const createStorage = (config: StorageConfig) => {
-  const resolveBucket = (bucket?: string) => bucket ?? config.defaultBucket;
+export interface StoragePort {
+  createS3UploadStream(
+    key: string,
+    contentType: string,
+    bucket?: string
+  ): UploadStream;
+  downloadToFile(key: string, outputPath: string, bucket?: string): Promise<void>;
+  getDefaultBucket(): string;
+  getPresignedDownloadUrl(options: {
+    bucket?: string;
+    key: string;
+    expiresIn?: number;
+  }): Promise<string>;
+  getPresignedUploadUrl(options: {
+    bucket?: string;
+    key: string;
+    contentType?: string;
+    expiresIn?: number;
+  }): Promise<string>;
+  getPublicUrl(key: string, bucket?: string): string;
+}
+
+export const createStorage = (config: StorageConfig): StoragePort => {
+  const client =
+    'client' in config ? config.client : createStorageClient(config);
+  const defaultBucket =
+    'client' in config ? config.defaultBucket : config.bucket;
+  const { endpoint, publicBaseUrl, region } = config;
+  const resolveBucket = (bucket?: string) => bucket ?? defaultBucket;
 
   const getPresignedUploadUrl = async ({
     bucket,
@@ -41,7 +83,7 @@ export const createStorage = (config: StorageConfig) => {
   }) => {
     const resolvedBucket = resolveBucket(bucket);
     return getSignedUrl(
-      config.client,
+      client,
       new PutObjectCommand({
         Bucket: resolvedBucket,
         Key: key,
@@ -62,7 +104,7 @@ export const createStorage = (config: StorageConfig) => {
   }) => {
     const resolvedBucket = resolveBucket(bucket);
     return getSignedUrl(
-      config.client,
+      client,
       new GetObjectCommand({
         Bucket: resolvedBucket,
         Key: key,
@@ -74,9 +116,13 @@ export const createStorage = (config: StorageConfig) => {
   const getPublicUrl = (key: string, bucket?: string): string => {
     const resolvedBucket = resolveBucket(bucket);
     const encodedKey = key.split('/').map(encodeURIComponent).join('/');
-    return config.endpoint
-      ? `${config.endpoint}/${resolvedBucket}/${encodedKey}`
-      : `https://${resolvedBucket}.s3.${config.region}.amazonaws.com/${encodedKey}`;
+    if (publicBaseUrl) {
+      return `${publicBaseUrl.replace(/\/$/, '')}/${encodedKey}`;
+    }
+
+    return endpoint
+      ? `${endpoint}/${resolvedBucket}/${encodedKey}`
+      : `https://${resolvedBucket}.s3.${region}.amazonaws.com/${encodedKey}`;
   };
 
   const createS3UploadStream = (
@@ -87,7 +133,7 @@ export const createStorage = (config: StorageConfig) => {
     const resolvedBucket = resolveBucket(bucket);
     const pass = new PassThrough();
     const upload = new Upload({
-      client: config.client,
+      client,
       params: {
         Bucket: resolvedBucket,
         Key: key,
@@ -110,7 +156,7 @@ export const createStorage = (config: StorageConfig) => {
   ) => {
     const resolvedBucket = resolveBucket(bucket);
     await mkdir(path.dirname(outputPath), { recursive: true });
-    const response = await config.client.send(
+    const response = await client.send(
       new GetObjectCommand({ Bucket: resolvedBucket, Key: key })
     );
     if (!(response.Body instanceof Readable)) {
@@ -122,11 +168,11 @@ export const createStorage = (config: StorageConfig) => {
   return {
     createS3UploadStream,
     downloadToFile,
-    getDefaultBucket: () => config.defaultBucket,
+    getDefaultBucket: () => defaultBucket,
     getPresignedDownloadUrl,
     getPresignedUploadUrl,
     getPublicUrl,
   };
 };
 
-export type Storage = ReturnType<typeof createStorage>;
+export type Storage = StoragePort;
