@@ -1,5 +1,6 @@
 services:
   localstack:
+    restart: unless-stopped
     image: localstack/localstack:4
     container_name: localstack
     ports:
