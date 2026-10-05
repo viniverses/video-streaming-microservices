@@ -25,17 +25,14 @@ async function runVideoTranscodeJob(
 
     const videoKey = s3Keys.rendition(videoId, resolution);
 
-    const { pass: videoPass, uploadPromise: videoUploadPromise } =
-      storage.createS3UploadStream(videoKey, 'video/mp4');
-
-    await transcodeToMp4Stream(
-      sourceUrl,
-      resolution,
-      videoPass,
-      (percent) => void job.updateProgress(Math.round(percent).toString())
+    await storage.withS3UploadStream(videoKey, 'video/mp4', (videoPass) =>
+      transcodeToMp4Stream(
+        sourceUrl,
+        resolution,
+        videoPass,
+        (percent) => void job.updateProgress(Math.round(percent).toString())
+      )
     );
-
-    await videoUploadPromise;
 
     console.log('Public URL:', storage.getPublicUrl(videoKey));
 

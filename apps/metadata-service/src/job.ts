@@ -20,6 +20,17 @@ import { storage } from '@/lib/s3.ts';
 
 const THUMBNAIL_COUNT = 3;
 
+async function waitForAll<T>(promises: Promise<T>[]): Promise<T[]> {
+  const results = await Promise.allSettled(promises);
+  const failure = results.find(
+    (result): result is PromiseRejectedResult => result.status === 'rejected'
+  );
+
+  if (failure) throw failure.reason;
+
+  return results.map((result) => (result as PromiseFulfilledResult<T>).value);
+}
+
 async function cleanUp(filePath: string) {
   await fs.unlink(filePath).catch((err) => {
     console.warn(`[job] Failed to clean up tmp file: ${err.message}`);
@@ -33,16 +44,12 @@ const extractAndUploadAudioTracks = async (
 ): Promise<AudioTrackInfo[]> => {
   if (tracks.length === 0) return [];
 
-  const audioTracks = await Promise.all(
+  const audioTracks = await waitForAll(
     tracks.map(async (track) => {
       const audioKey = s3Keys.audioTrack(videoId, track.trackIndex);
-      const { pass, uploadPromise } = storage.createS3UploadStream(
-        audioKey,
-        'audio/mp4'
+      await storage.withS3UploadStream(audioKey, 'audio/mp4', (pass) =>
+        extractAudioTrackStream(source, track.trackIndex, pass)
       );
-
-      await extractAudioTrackStream(source, track.trackIndex, pass);
-      await uploadPromise;
 
       return {
         ...track,
@@ -64,16 +71,12 @@ const extractAndUploadThumbnails = async (
   videoId: string,
   timestamps: number[]
 ): Promise<ThumbnailInfo[]> =>
-  Promise.all(
+  waitForAll(
     timestamps.map(async (seekSeconds, index) => {
       const thumbKey = s3Keys.thumbnail(videoId, index, seekSeconds);
-      const { pass, uploadPromise } = storage.createS3UploadStream(
-        thumbKey,
-        'image/jpeg'
+      await storage.withS3UploadStream(thumbKey, 'image/jpeg', (pass) =>
+        extractThumbnail(source, seekSeconds, pass)
       );
-
-      await extractThumbnail(source, seekSeconds, pass);
-      await uploadPromise;
 
       return {
         timestamp: seekSeconds,
@@ -102,7 +105,7 @@ async function runVideoMetadataJob(
     const duration = metadata.duration ?? 0;
     const timestamps = buildThumbnailTimestamps(duration, THUMBNAIL_COUNT);
 
-    const [audioTracks, thumbnails] = await Promise.all([
+    const [audioResult, thumbnailResult] = await Promise.allSettled([
       extractAndUploadAudioTracks(
         localPath,
         videoId,
@@ -110,6 +113,12 @@ async function runVideoMetadataJob(
       ),
       extractAndUploadThumbnails(localPath, videoId, timestamps),
     ]);
+
+    if (audioResult.status === 'rejected') throw audioResult.reason;
+    if (thumbnailResult.status === 'rejected') throw thumbnailResult.reason;
+
+    const audioTracks = audioResult.value;
+    const thumbnails = thumbnailResult.value;
 
     const metadataCandidate = {
       duration: metadata.duration,

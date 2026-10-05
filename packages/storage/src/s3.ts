@@ -46,7 +46,17 @@ export interface StoragePort {
     contentType: string,
     bucket?: string
   ): UploadStream;
-  downloadToFile(key: string, outputPath: string, bucket?: string): Promise<void>;
+  withS3UploadStream<T>(
+    key: string,
+    contentType: string,
+    write: (pass: Writable) => Promise<T>,
+    bucket?: string
+  ): Promise<T>;
+  downloadToFile(
+    key: string,
+    outputPath: string,
+    bucket?: string
+  ): Promise<void>;
   getDefaultBucket(): string;
   getPresignedDownloadUrl(options: {
     bucket?: string;
@@ -142,11 +152,37 @@ export const createStorage = (config: StorageConfig): StoragePort => {
       },
     });
     const abort = async () => {
+      // Ensure aborting before a writer attaches its own error listener cannot
+      // emit an unhandled stream error.
+      pass.on('error', () => undefined);
       pass.destroy(new Error('Upload aborted'));
       await upload.abort().catch(() => undefined);
     };
     const uploadPromise = upload.done().then(() => undefined);
     return { pass, uploadPromise, abort };
+  };
+
+  const withS3UploadStream = async <T>(
+    key: string,
+    contentType: string,
+    write: (pass: Writable) => Promise<T>,
+    bucket?: string
+  ): Promise<T> => {
+    const { pass, uploadPromise, abort } = createS3UploadStream(
+      key,
+      contentType,
+      bucket
+    );
+    const writePromise = Promise.resolve().then(() => write(pass));
+
+    try {
+      const [result] = await Promise.all([writePromise, uploadPromise]);
+      return result;
+    } catch (error) {
+      await abort();
+      await Promise.allSettled([writePromise, uploadPromise]);
+      throw error;
+    }
   };
 
   const downloadToFile = async (
@@ -167,6 +203,7 @@ export const createStorage = (config: StorageConfig): StoragePort => {
 
   return {
     createS3UploadStream,
+    withS3UploadStream,
     downloadToFile,
     getDefaultBucket: () => defaultBucket,
     getPresignedDownloadUrl,
