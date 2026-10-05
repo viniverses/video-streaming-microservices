@@ -53,7 +53,6 @@ export const uploadRoutes = (app: Elysia) => {
             bucket: storage.getDefaultBucket(),
             key,
             videoId,
-            sourceUrl: await storage.getPresignedDownloadUrl({ key }),
           });
         },
         {

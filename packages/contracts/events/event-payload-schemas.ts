@@ -66,7 +66,6 @@ export const videoUploadedPayloadSchema = z
     bucket: nonEmptyStringSchema,
     key: nonEmptyStringSchema,
     videoId: videoIdSchema,
-    sourceUrl: z.string().url(),
   })
   .strict();
 
