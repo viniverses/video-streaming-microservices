@@ -1,6 +1,6 @@
 import { RabbitMQDomainBroker } from '@repo/broker';
 
-import { env } from '../config/env.ts';
+import { env } from '../../env.ts';
 
 export const broker = new RabbitMQDomainBroker({
   url: env.BROKER_URL,

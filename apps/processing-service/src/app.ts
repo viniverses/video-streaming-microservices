@@ -1,13 +1,15 @@
 import { cors } from '@elysiajs/cors';
 import { node } from '@elysiajs/node';
 import { registerAppShutdown } from '@repo/broker';
+import { sql } from 'drizzle-orm';
 import { Elysia } from 'elysia';
 
 import { broker } from '@/broker/broker.ts';
 import { registerConsumers } from '@/broker/register-consumers.ts';
 import { processingRoutes } from '@/http/routes/processing.ts';
 
-import { env } from './config/env.ts';
+import { env } from '../env.ts';
+import { db } from './db/client.ts';
 import { flowProducer } from './flow-producer.ts';
 import { redis } from './lib/redis.ts';
 import { worker } from './worker.ts';
@@ -43,9 +45,36 @@ app.get('/health', ({ status }) => {
   return status(200, 'OK');
 });
 
+app.get('/ready', async ({ status }) => {
+  const [brokerReady, redisReady, databaseReady] = await Promise.all([
+    broker.checkConnection(),
+    redis.status === 'ready'
+      ? redis.ping().then(
+          () => true,
+          () => false
+        )
+      : false,
+    db.execute(sql`select 1`).then(
+      () => true,
+      () => false
+    ),
+  ]);
+  const dependencies = {
+    broker: brokerReady,
+    redis: redisReady,
+    database: databaseReady,
+  };
+  const ready = Object.values(dependencies).every(Boolean);
+
+  return status(ready ? 200 : 503, {
+    status: ready ? 'ready' : 'not ready',
+    dependencies,
+  });
+});
+
 app.use(processingRoutes);
 
-app.listen(3334, ({ hostname, port }) => {
+app.listen(env.PORT, ({ hostname, port }) => {
   console.log(
     '\x1b[32m[Processing]\x1b[0m HTTP server running at %s:%s',
     hostname,

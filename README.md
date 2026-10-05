@@ -69,7 +69,7 @@ docker build -f docker/Dockerfile.service --build-arg SERVICE=transcode-service 
 
 - **Two transports, one design**: RabbitMQ for typed domain events and BullMQ for CPU-bound jobs with controlled parallelism (`concurrency: 3` for transcode, `2` for metadata); both scale horizontally through shared infrastructure.
 - **Monorepo with Turborepo pipeline**: `check-types` and `lint` across every package/app with granular caching and `dependsOn` (`^check-types`), avoiding redundant builds.
-- **Capability-scoped env validation** (`@repo/env`) via Zod — each service validates only the variables it consumes.
+- **Capability-scoped env validation** (`@repo/env`) via Zod and `@t3-oss/env-core` — each service extends only the presets it consumes.
 - **Reliable messaging**: publisher confirms, runtime contract validation, three delayed retries and a dead-letter queue per consumer/event subscription.
 - **Object Ownership enforced + bucket policy**: uploads without per-object ACLs; originals stay private under `originals/*`, while public read is scoped to derived media under `videos/*/{renditions,thumbnails,audio}/*`.
 - **Idempotency at the boundary**: the S3 webhook validates the key (`ORIGINAL_UPLOAD_KEY_PATTERN`) and discards events outside the original-upload scope — prevents duplicate pipelines.

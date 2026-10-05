@@ -1,6 +1,6 @@
 import { createStorage } from '@repo/storage';
 
-import { env } from '../config/env.ts';
+import { env } from '../../env.ts';
 
 export const storage = createStorage({
   region: env.AWS_REGION,

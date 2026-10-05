@@ -37,6 +37,15 @@ export class RabbitMQDomainBroker implements DomainBroker {
 
   constructor(private readonly options: RabbitMQBrokerOptions) {}
 
+  async checkConnection(): Promise<boolean> {
+    try {
+      await this.getChannel();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private async getChannel(): Promise<ConfirmChannel> {
     if (this.channel) return this.channel;
     if (this.connecting) return this.connecting;

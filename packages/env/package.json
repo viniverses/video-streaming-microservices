@@ -4,24 +4,25 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    "./broker": "./src/broker.ts",
+    "./database": "./src/database.ts",
+    "./redis": "./src/redis.ts",
+    "./storage": "./src/storage.ts"
   },
-  "types": "./index.ts",
-  "main": "./index.ts",
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "dotenv": "^17.2.2",
-    "zod": "^3.22.4"
+    "@t3-oss/env-core": "^0.13.11",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "20.4.0",
+    "@types/node": "^24.5.2",
     "eslint": "^10.2.0",
     "typescript": "^5.9.2"
   },

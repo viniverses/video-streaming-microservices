@@ -41,9 +41,18 @@ importers:
       '@repo/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(typescript@5.9.2)(zod@3.25.76)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       elysia:
         specifier: 1.4.7
         version: 1.4.7(exact-mirror@1.0.0)(file-type@22.0.1)(typescript@5.9.2)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -93,6 +102,12 @@ importers:
       '@repo/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(typescript@5.9.2)(zod@3.25.76)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       drizzle-orm:
         specifier: ^0.44.5
         version: 0.44.7(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.20.0)
@@ -102,6 +117,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.20.0
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -157,9 +175,18 @@ importers:
       '@repo/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(typescript@5.9.2)(zod@3.25.76)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       elysia:
         specifier: 1.4.7
         version: 1.4.7(exact-mirror@1.0.0)(file-type@22.0.1)(typescript@5.9.2)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -209,12 +236,21 @@ importers:
       '@repo/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(typescript@5.9.2)(zod@3.25.76)
       aws-lambda:
         specifier: ^1.0.7
         version: 1.0.7
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       elysia:
         specifier: 1.4.7
         version: 1.4.7(exact-mirror@1.0.0)(file-type@22.0.1)(typescript@5.9.2)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -470,11 +506,11 @@ importers:
 
   packages/env:
     dependencies:
-      dotenv:
-        specifier: ^17.2.2
-        version: 17.4.2
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(typescript@5.9.2)(zod@3.25.76)
       zod:
-        specifier: ^3.22.4
+        specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
       '@repo/eslint-config':
@@ -487,8 +523,8 @@ importers:
         specifier: workspace:*
         version: link:../../configs/typescript-config
       '@types/node':
-        specifier: 20.4.0
-        version: 20.4.0
+        specifier: ^24.5.2
+        version: 24.12.2
       eslint:
         specifier: ^10.2.0
         version: 10.2.0(jiti@2.7.0)
@@ -2379,6 +2415,23 @@ packages:
   '@smithy/uuid@1.1.2':
     resolution: {integrity: sha512-O/IEdcCUKkubz60tFbGA7ceITTAJsty+lBjNoorP4Z6XRqaFb/OjQjZODophEcuq68nKm6/0r+6/lLQ+XVpk8g==}
     engines: {node: '>=18.0.0'}
+
+  '@t3-oss/env-core@0.13.11':
+    resolution: {integrity: sha512-sM7GYY+KL7H/Hl0BE0inWfk3nRHZOLhmVn7sHGxaZt9FAR6KqREXAE+6TqKfiavfXmpRxO/OZ2QgKRd+oiBYRQ==}
+    peerDependencies:
+      arktype: ^2.1.0
+      typescript: '>=5.0.0'
+      valibot: ^1.0.0-beta.7 || ^1.0.0
+      zod: ^3.24.0 || ^4.0.0
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+      typescript:
+        optional: true
+      valibot:
+        optional: true
+      zod:
+        optional: true
 
   '@tailwindcss/node@4.3.0':
     resolution: {integrity: sha512-aFb4gUhFOgdh9AXo4IzBEOzBkkAxm9VigwDJnMIYv3lcfXCJVesNfbEaBl4BNgVRyid92AmdviqwBUBRKSeY3g==}
@@ -8178,6 +8231,11 @@ snapshots:
   '@smithy/uuid@1.1.2':
     dependencies:
       tslib: 2.8.1
+
+  '@t3-oss/env-core@0.13.11(typescript@5.9.2)(zod@3.25.76)':
+    optionalDependencies:
+      typescript: 5.9.2
+      zod: 3.25.76
 
   '@tailwindcss/node@4.3.0':
     dependencies:

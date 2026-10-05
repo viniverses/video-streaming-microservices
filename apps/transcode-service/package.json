@@ -18,14 +18,17 @@
   "packageManager": "pnpm@10.16.1",
   "prettier": "@repo/prettier-config",
   "dependencies": {
+    "@elysiajs/node": "1.4.0",
     "@repo/broker": "workspace:*",
     "@repo/contracts": "workspace:*",
     "@repo/env": "workspace:*",
     "@repo/ffmpeg": "workspace:*",
     "@repo/queue": "workspace:*",
     "@repo/storage": "workspace:*",
-    "@elysiajs/node": "1.4.0",
-    "elysia": "1.4.7"
+    "@t3-oss/env-core": "^0.13.11",
+    "dotenv": "^17.4.2",
+    "elysia": "1.4.7",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

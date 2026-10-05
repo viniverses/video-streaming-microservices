@@ -4,8 +4,8 @@ import { swagger } from '@elysiajs/swagger';
 import { registerAppShutdown } from '@repo/broker';
 import { Elysia } from 'elysia';
 
+import { env } from '../../env.ts';
 import { broker } from '../broker/broker.ts';
-import { env } from '../config/env.ts';
 import { uploadRoutes } from './routes/upload.ts';
 
 const defaultCorsOrigins = [
@@ -40,7 +40,7 @@ app.use(
         version: '1.0',
       },
     },
-    exclude: ['/health'],
+    exclude: ['/health', '/ready'],
   })
 );
 
@@ -48,9 +48,19 @@ app.get('/health', ({ status }) => {
   return status(200, 'OK');
 });
 
+app.get('/ready', async ({ status }) => {
+  const dependencies = { broker: await broker.checkConnection() };
+  const ready = Object.values(dependencies).every(Boolean);
+
+  return status(ready ? 200 : 503, {
+    status: ready ? 'ready' : 'not ready',
+    dependencies,
+  });
+});
+
 app.use(uploadRoutes);
 
-app.listen(3333, ({ hostname, port }) => {
+app.listen(env.PORT, ({ hostname, port }) => {
   console.log(
     '\x1b[32m[Upload]\x1b[0m HTTP server running at %s:%s',
     hostname,
